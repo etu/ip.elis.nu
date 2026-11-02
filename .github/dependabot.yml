@@ -4,5 +4,25 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: daily
+      interval: monthly
     open-pull-requests-limit: 10
+
+  - package-ecosystem: nix
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - dependencies
+      - automated
+
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - dependencies
+      - automated

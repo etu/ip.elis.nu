@@ -1,0 +1,52 @@
+---
+name: Fix vendorHash
+
+'on':
+  pull_request:
+    paths:
+      - go.mod
+      - go.sum
+
+jobs:
+  vendor-hash:
+    # Only run for Dependabot PRs, and only when the branch lives in this repo
+    if: >-
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: DeterminateSystems/nix-installer-action@v23
+
+      - name: Compute new vendorHash
+        id: hash
+        run: |
+          old=$(sed -nE 's/.*vendorHash = "([^"]+)";.*/\1/p' flake.nix)
+          fake='sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
+
+          sed -i "s|$old|$fake|" flake.nix
+          new=$(nix build .#default 2>&1 | sed -nE 's/.*got: *(sha256-[^ ]+).*/\1/p' | head -n1)
+
+          if [ -z "$new" ]; then
+            echo "Could not determine new vendorHash" >&2
+            exit 1
+          fi
+
+          sed -i "s|$fake|$new|" flake.nix
+          echo "old=$old" >> "$GITHUB_OUTPUT"
+          echo "new=$new" >> "$GITHUB_OUTPUT"
+
+      - name: Verify build
+        run: nix build .#default
+
+      - name: Commit and push
+        if: steps.hash.outputs.old != steps.hash.outputs.new
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -am 'chore(deps): Update vendorHash'
+          git push
