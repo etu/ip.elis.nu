@@ -1,4 +1,4 @@
-module github.com/etu/ip.failar.nu
+module github.com/etu/ip.elis.nu
 
 go 1.21.7
 

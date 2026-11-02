@@ -1,4 +1,4 @@
-package main // import "github.com/etu/ip.failar.nu"
+package main // import "github.com/etu/ip.elis.nu"
 
 import (
 	"flag"

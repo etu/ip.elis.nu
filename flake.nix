@@ -1,5 +1,5 @@
 {
-  description = "etu/ip.failar.nu";
+  description = "etu/ip.elis.nu";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -19,7 +19,7 @@
         default = pkgs.buildGoModule (let
           version = "1.0.${nixpkgs.lib.substring 0 8 self.lastModifiedDate}.${self.shortRev or "dirty"}";
         in {
-          pname = "ip-failar-nu";
+          pname = "ip-elis-nu";
           inherit version;
 
           src = ./.;
@@ -49,24 +49,24 @@
         pkgs,
         ...
       }: let
-        cfg = config.services.ip-failar-nu;
+        cfg = config.services.ip-elis-nu;
         pkg = self.packages.${system}.default;
       in {
         # Set up module options
-        options.services.ip-failar-nu.enable =
+        options.services.ip-elis-nu.enable =
           lib.mkEnableOption
           "Service that responds over http with the connecting clients IP";
 
         # Set up module implementation
         config = lib.mkIf cfg.enable {
-          systemd.services.ip-failar-nu = {
-            description = "ip-failar-nu";
+          systemd.services.ip-elis-nu = {
+            description = "ip-elis-nu";
             after = ["network.target"];
             wantedBy = ["multi-user.target"];
             serviceConfig = {
               Type = "simple";
               User = "nobody";
-              ExecStart = "${pkg}/bin/ip.failar.nu";
+              ExecStart = "${pkg}/bin/ip.elis.nu";
               Restart = "always";
             };
           };
